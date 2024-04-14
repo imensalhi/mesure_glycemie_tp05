@@ -1,4 +1,4 @@
-package com.example.salhi_imen_mesure_glycemie;
+package com.example.salhi_imen_mesure_glycemie.view;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,13 +9,17 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.salhi_imen_mesure_glycemie.R;
+import com.example.salhi_imen_mesure_glycemie.controller.Controller;
+
 public class MainActivity extends AppCompatActivity {
     private EditText etValeur;
     private TextView tvAge, tvReponse;
     private SeekBar sbAge;
     private RadioButton rbIsFasting, rbIsNotFasting;
     private Button btnConsulter;
-
+    private Controller controller ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         btnConsulter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int age ;
+                float valeur ;
 
                 Log.i("Information", "button cliqué");
                 boolean verifAge = false, verifValeur = false;
@@ -52,49 +58,20 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Veuillez saisir votre valeur mesurée !", Toast.LENGTH_LONG).show();
                 if(verifAge && verifValeur)
                 {
-                    calculer();
+                    age = sbAge.getProgress();
+                    valeur=Float.valueOf(etValeur.getText().toString());
+                    // Fleche "UserAction" View --> Controller
+                    controller.createPatient(age,valeur,rbIsFasting.isChecked());
+                    // Fleche "Notify" Controller --> View
+                    tvReponse.setText(controller.getResult());
                 }
             }
         });
     }
-    public void calculer ()
-    {
-        int age = Integer.valueOf(sbAge.getProgress());
-        float valeurMesuree = Float.valueOf(etValeur.getText().toString());
-        boolean isFasting = rbIsFasting.isChecked();
-        if(isFasting) {
-            if (age >= 13) {
-                if (valeurMesuree < 5.0)
-                    tvReponse.setText("Niveau de glycémie est trop bas");
-                else if (valeurMesuree >= 5.0 && valeurMesuree <= 7.2)
-                    tvReponse.setText("Niveau de glycémie est normale");
-                else
-                    tvReponse.setText("Niveau de glycémie est trop élevé");
-            } else if (age >= 6 && age <= 12) {
-                if (valeurMesuree < 5.0)
-                    tvReponse.setText("Niveau de glycémie est trop bas");
-                else if (valeurMesuree >= 5.0 && valeurMesuree <= 10.0)
-                    tvReponse.setText("Niveau de glycémie est normale");
-                else
-                    tvReponse.setText("Niveau de glycémie est trop élevé");
-            } else if (age < 6) {
-                if (valeurMesuree < 5.5)
-                    tvReponse.setText("Niveau de glycémie est trop bas");
-                else if (valeurMesuree >= 5.5 && valeurMesuree <= 10.0)
-                    tvReponse.setText("Niveau de glycémie est normale");
 
-                else
-                    tvReponse.setText("Niveau de glycémie est trop élevé");
-            }
-        } else {
-            if (valeurMesuree > 10.5)
-                tvReponse.setText("Niveau de glycémie est trop élevé");
-            else
-                tvReponse.setText("Niveau de glycémie est normale");
-        }
-    }
     private void init()
     {
+        controller = Controller.getInstance();
         sbAge = findViewById(R.id.sbAge);
         tvAge = findViewById(R.id.tvAge);
         etValeur = findViewById(R.id.etValeur);
