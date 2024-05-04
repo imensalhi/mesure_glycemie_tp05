@@ -1,5 +1,8 @@
 package com.example.salhi_imen_mesure_glycemie.view;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,12 +17,14 @@ import com.example.salhi_imen_mesure_glycemie.R;
 import com.example.salhi_imen_mesure_glycemie.controller.Controller;
 
 public class MainActivity extends AppCompatActivity {
+    private final String RESPONSE_KEY = "result";
+    private final int REQUEST_CODE =1;//code de ConsultActivity
     private EditText etValeur;
-    private TextView tvAge, tvReponse;
+    private TextView tvAge; //tvReponse;
     private SeekBar sbAge;
     private RadioButton rbIsFasting, rbIsNotFasting;
     private Button btnConsulter;
-    private Controller controller ;
+    private Controller controller;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!etValeur.getText().toString().isEmpty())
                     verifValeur = true;
                 else
-                    Toast.makeText(MainActivity.this, "Veuillez saisir votre valeur mesurée !", Toast.LENGTH_LONG).show();
+                   Toast.makeText(MainActivity.this, "Veuillez saisir votre valeur mesurée !", Toast.LENGTH_LONG).show();
                 if(verifAge && verifValeur)
                 {
                     age = sbAge.getProgress();
@@ -63,10 +68,24 @@ public class MainActivity extends AppCompatActivity {
                     // Fleche "UserAction" View --> Controller
                     controller.createPatient(age,valeur,rbIsFasting.isChecked());
                     // Fleche "Notify" Controller --> View
-                    tvReponse.setText(controller.getResult());
+                    //tvReponse.setText(controller.getResult());
+                    Intent intent = new Intent(MainActivity.this,ConsultActivity.class);
+                    intent.putExtra (RESPONSE_KEY,controller.getResult());
+                    startActivityForResult(intent, REQUEST_CODE);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE)
+        {
+            if (resultCode == RESULT_CANCELED)
+                Toast.makeText(MainActivity.this,"ERROR: RESULT_CANCELED", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void init()
@@ -78,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         rbIsFasting = findViewById(R.id.rbtOui);
         rbIsNotFasting = findViewById(R.id.rbtNon);
         btnConsulter = findViewById(R.id.btnConsulter);
-        tvReponse = findViewById(R.id.tvReponse);
+        //tvReponse = findViewById(R.id.tvReponse);
+
     }
 }
